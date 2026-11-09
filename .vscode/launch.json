@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Run Metro & Bus Fare Calculator",
+            "request": "launch",
+            "mainClass": "com.transit.farecalculator.MetroFareCalculatorApplication",
+            "projectName": "metro-bus-fare-calculator",
+            "vmArgs": "-Xmx512m -Xms128m"
+        }
+    ]
+}

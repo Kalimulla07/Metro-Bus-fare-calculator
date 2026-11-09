@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metro & Bus Fare Calculator with Dynamic Pricing</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Header & Navigation Bar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="brand">
+                <div class="brand-logo">
+                    <!-- Transit SVG Icon -->
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="4" y="3" width="16" height="16" rx="2"></rect>
+                        <path d="M4 11h16"></path>
+                        <path d="M12 3v8"></path>
+                        <circle cx="8" cy="15" r="1"></circle>
+                        <circle cx="16" cy="15" r="1"></circle>
+                        <path d="M7 19l-2 2"></path>
+                        <path d="M17 19l2 2"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="brand-title">TransitFare Pro</h1>
+                    <p class="brand-subtitle">Metro & Bus Fare Calculator with Dynamic Pricing</p>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="nav-links">
+                <button class="nav-btn active" data-tab="tab-dashboard">Home</button>
+                <button class="nav-btn" data-tab="tab-calculator">Calculate Fare</button>
+                <button class="nav-btn" data-tab="tab-routes">Route Information</button>
+                <button class="nav-btn" data-tab="tab-pricing">Dynamic Pricing</button>
+                <button class="nav-btn" data-tab="tab-history">Fare History</button>
+                <button class="nav-btn" data-tab="tab-about">About Project</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <!-- Toast / Alert Notification Box -->
+        <div id="toast-message" class="toast hidden"></div>
+
+        <!-- 4 Top Dashboard Summary Cards -->
+        <section class="dashboard-cards-grid">
+            <div class="metric-card">
+                <div class="metric-icon blue-bg">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#2563eb" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                </div>
+                <div class="metric-info">
+                    <span class="metric-label">Total Journeys</span>
+                    <h2 class="metric-value" id="card-total-journeys">--</h2>
+                    <span class="metric-sub">Stored in database</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon green-bg">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#16a34a" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+                <div class="metric-info">
+                    <span class="metric-label">Average Fare</span>
+                    <h2 class="metric-value" id="card-avg-fare">--</h2>
+                    <span class="metric-sub">Across all trips</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon red-bg">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#dc2626" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                </div>
+                <div class="metric-info">
+                    <span class="metric-label">Peak Hour Fare</span>
+                    <h2 class="metric-value" id="card-peak-fare">--</h2>
+                    <span class="metric-sub">Avg Peak Rate (+30%)</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon cyan-bg">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#0891b2" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>
+                </div>
+                <div class="metric-info">
+                    <span class="metric-label">Off-Peak Fare</span>
+                    <h2 class="metric-value" id="card-offpeak-fare">--</h2>
+                    <span class="metric-sub">Avg Off-Peak Rate (-10%)</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 1: HOME (DASHBOARD) ================= -->
+        <section id="tab-dashboard" class="tab-pane active">
+            <div class="grid-2-col">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Welcome to TransitFare Pro</h3>
+                        <span class="badge blue">System Online</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">
+                            TransitFare Pro is an intelligent transit fare management platform for modern metropolitan subway and bus networks.
+                            It calculates transparent fares using Strategy Design Pattern pricing models, optimal routing via Dijkstra's Algorithm,
+                            and responsive dynamic surge pricing to manage passenger congestion.
+                        </p>
+                        
+                        <div class="quick-actions-box">
+                            <h4>Quick Actions</h4>
+                            <div class="button-row">
+                                <button class="btn btn-primary" onclick="switchTab('tab-calculator')">Calculate a Fare</button>
+                                <button class="btn btn-outline" onclick="switchTab('tab-routes')">Find Shortest Route</button>
+                                <button class="btn btn-outline" onclick="switchTab('tab-pricing')">View Demand Trends</button>
+                            </div>
+                        </div>
+
+                        <div class="features-summary">
+                            <div class="feature-item">
+                                <strong>3 Pricing Strategies:</strong> Distance-Based, Zone-Based, and Peak/Off-Peak Dynamic Strategy.
+                            </div>
+                            <div class="feature-item">
+                                <strong>Dijkstra Route Optimization:</strong> Automatically computes the quickest route between stations.
+                            </div>
+                            <div class="feature-item">
+                                <strong>MySQL Persistent Storage:</strong> Every trip calculation is recorded with complete cost breakdowns.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>System Status &amp; Real-time Demand</h3>
+                        <span class="badge green" id="live-demand-badge">Normal Demand</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="status-indicator-box">
+                            <div class="status-row">
+                                <span>Current Dynamic Multiplier:</span>
+                                <strong id="home-surge-multiplier">1.00x (Baseline)</strong>
+                            </div>
+                            <div class="status-row">
+                                <span>Active Stations:</span>
+                                <strong id="home-stations-count">13 Interconnected Stations</strong>
+                            </div>
+                            <div class="status-row">
+                                <span>Active Transit Lines:</span>
+                                <strong>3 Metro Lines &bull; 3 Bus Routes</strong>
+                            </div>
+                            <div class="status-row">
+                                <span>Database Connection:</span>
+                                <strong class="text-success">Connected (MySQL: transit_fare_db)</strong>
+                            </div>
+                        </div>
+
+                        <div class="banner-box">
+                            <h4>Peak Hour Notice</h4>
+                            <p class="small text-muted">
+                                Peak hours are active daily from <strong>08:00 AM - 10:30 AM</strong> and <strong>05:00 PM - 07:30 PM</strong>.
+                                Save 10% to 40% on travel fares by planning your journeys during off-peak windows.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Calculations Table on Home -->
+            <div class="card mt-24">
+                <div class="card-header">
+                    <h3>Recent Fare Calculations</h3>
+                    <button class="btn btn-sm btn-outline" onclick="switchTab('tab-history')">View Full History &rarr;</button>
+                </div>
+                <div class="card-body table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date &amp; Time</th>
+                                <th>Transport</th>
+                                <th>Source &rarr; Destination</th>
+                                <th>Distance</th>
+                                <th>Passenger</th>
+                                <th>Travel Time</th>
+                                <th>Final Fare</th>
+                            </tr>
+                        </thead>
+                        <tbody id="home-recent-table-body">
+                            <tr><td colspan="7" class="text-center text-muted">Loading recent calculations...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 2: CALCULATE FARE ================= -->
+        <section id="tab-calculator" class="tab-pane">
+            <div class="grid-2-col">
+                <!-- Fare Calculator Form -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Fare Calculator</h3>
+                        <span class="badge blue">Step-by-Step</span>
+                    </div>
+                    <div class="card-body">
+                        <form id="fare-calculator-form">
+                            <!-- Transport Type -->
+                            <div class="form-group">
+                                <label for="transportType">Transport Type <span class="required">*</span></label>
+                                <select id="transportType" class="form-control" required>
+                                    <option value="METRO">Metro (Subway Train)</option>
+                                    <option value="BUS">Bus (City Transit)</option>
+                                </select>
+                            </div>
+
+                            <!-- Source and Destination -->
+                            <div class="form-row">
+                                <div class="form-group col">
+                                    <label for="sourceStation">Source Station <span class="required">*</span></label>
+                                    <select id="sourceStation" class="form-control" required>
+                                        <option value="">-- Select Source Station --</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col">
+                                    <label for="destinationStation">Destination Station <span class="required">*</span></label>
+                                    <select id="destinationStation" class="form-control" required>
+                                        <option value="">-- Select Destination Station --</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Distance -->
+                            <div class="form-group">
+                                <label for="distanceKm">
+                                    Distance (in km) <span class="required">*</span>
+                                    <span class="hint-text">(Auto-filled from route or enter custom)</span>
+                                </label>
+                                <input type="number" id="distanceKm" class="form-control" step="0.1" min="0.5" max="200" placeholder="e.g. 14.5" required>
+                            </div>
+
+                            <!-- Passenger Type & Travel Time -->
+                            <div class="form-row">
+                                <div class="form-group col">
+                                    <label for="passengerType">Passenger Type <span class="required">*</span></label>
+                                    <select id="passengerType" class="form-control" required>
+                                        <option value="Normal">Normal Passenger</option>
+                                        <option value="Student">Student (25% Discount)</option>
+                                        <option value="Senior Citizen">Senior Citizen (40% Discount)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col">
+                                    <label for="travelTime">Travel Time <span class="required">*</span></label>
+                                    <select id="travelTime" class="form-control" required>
+                                        <option value="Peak">Peak Hours (Surge pricing active)</option>
+                                        <option value="Off-Peak" selected>Off-Peak Hours (Saver rates)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Strategy Selection -->
+                            <div class="form-group">
+                                <label for="strategyType">Fare Calculation Strategy <span class="required">*</span></label>
+                                <select id="strategyType" class="form-control" required>
+                                    <option value="DISTANCE" selected>Distance-Based Strategy (Linear km rate)</option>
+                                    <option value="ZONE">Zone-Based Strategy (Zonal boundaries)</option>
+                                    <option value="PEAK_OFF_PEAK">Peak/Off-Peak Dynamic Strategy (Demand responsive)</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-block" id="calc-submit-btn">
+                                Calculate Fare
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Calculation Result Card -->
+                <div class="card result-card" id="calculation-result-card">
+                    <div class="card-header">
+                        <h3>Calculation Summary</h3>
+                        <span class="badge gray" id="res-strategy-badge">Awaiting Input</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="result-placeholder" class="placeholder-state">
+                            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#94a3b8" stroke-width="1.5">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M12 6v6l4 2"></path>
+                            </svg>
+                            <p>Fill out the form and click <strong>Calculate Fare</strong> to see the exact breakdown.</p>
+                        </div>
+
+                        <div id="result-details" class="result-details hidden">
+                            <div class="total-fare-highlight">
+                                <span class="total-label">Final Calculated Fare</span>
+                                <h1 class="total-amount" id="res-final-fare">&#8377;0.00</h1>
+                                <span class="total-sub" id="res-timestamp">Calculated just now</span>
+                            </div>
+
+                            <div class="breakdown-list">
+                                <div class="breakdown-row">
+                                    <span>Base Fare:</span>
+                                    <strong id="res-base-fare">&#8377;0.00</strong>
+                                </div>
+                                <div class="breakdown-row">
+                                    <span>Distance Charge:</span>
+                                    <strong id="res-distance-charge">&#8377;0.00</strong>
+                                </div>
+                                <div class="breakdown-row">
+                                    <span>Dynamic Pricing Adjustment:</span>
+                                    <strong id="res-dynamic-adjustment" class="text-warning">&#8377;0.00</strong>
+                                </div>
+                                <div class="breakdown-row">
+                                    <span>Passenger Discount:</span>
+                                    <strong id="res-discount" class="text-success">-&#8377;0.00</strong>
+                                </div>
+                            </div>
+
+                            <div class="formula-box">
+                                <strong>Formula &amp; Strategy Breakdown:</strong>
+                                <p id="res-breakdown-desc" class="small text-muted"></p>
+                            </div>
+
+                            <div class="history-save-note">
+                                <small>&#10004; Saved to MySQL Database History (Record #<span id="res-record-id">--</span>)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 3: ROUTE INFORMATION ================= -->
+        <section id="tab-routes" class="tab-pane">
+            <div class="grid-2-col">
+                <!-- Shortest Path Finder via Dijkstra -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Shortest Route Finder</h3>
+                        <span class="badge blue">Dijkstra's Algorithm</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small">
+                            Select origin and destination stations. Our Java graph engine uses Dijkstra's Algorithm 
+                            to determine the optimal path with minimal travel distance and transfer overhead.
+                        </p>
+
+                        <div class="form-row">
+                            <div class="form-group col">
+                                <label for="routeSource">From (Origin)</label>
+                                <select id="routeSource" class="form-control"></select>
+                            </div>
+                            <div class="form-group col">
+                                <label for="routeDest">To (Destination)</label>
+                                <select id="routeDest" class="form-control"></select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="routeMode">Preferred Transport Mode</label>
+                            <select id="routeMode" class="form-control">
+                                <option value="METRO">Metro (High Speed Rail)</option>
+                                <option value="BUS">Bus Transit</option>
+                            </select>
+                        </div>
+
+                        <button class="btn btn-primary btn-block" onclick="calculateShortestRoute()">Find Shortest Route</button>
+
+                        <!-- Route Solution Output -->
+                        <div id="route-output-box" class="route-output-box mt-16 hidden">
+                            <h4>Optimal Transit Path</h4>
+                            <div class="route-station-chain" id="route-chain"></div>
+                            
+                            <div class="route-metric-grid">
+                                <div class="metric-item">
+                                    <span class="metric-title">Total Distance</span>
+                                    <strong id="route-total-km">-- km</strong>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-title">Estimated Time</span>
+                                    <strong id="route-total-time">-- mins</strong>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-title">Estimated Fare</span>
+                                    <strong id="route-est-fare">&#8377;--</strong>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-title">Stations Traversed</span>
+                                    <strong id="route-total-stops">-- stops</strong>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-sm btn-outline mt-16" onclick="transferRouteToCalculator()">
+                                Use this distance in Fare Calculator &rarr;
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Network Route Catalog -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Available Transit Lines</h3>
+                        <span class="badge green">Live Network</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="routes-catalog-list" class="routes-catalog">
+                            <p class="text-muted">Loading network routes...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 4: DYNAMIC PRICING ================= -->
+        <section id="tab-pricing" class="tab-pane">
+            <div class="card mb-24">
+                <div class="card-header">
+                    <h3>24-Hour Passenger Demand Curve &amp; Peak Hour Pricing</h3>
+                    <span class="badge red">Dynamic Surge Algorithm</span>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Dynamic pricing adjusts fares according to real-time passenger crowding. Peak hours generate demand management 
+                        surcharges (+30%) to reduce bottlenecking, while quiet off-peak periods receive discounts (-10% to -15%) 
+                        to stimulate transit adoption.
+                    </p>
+
+                    <!-- Demand Bar Chart Canvas -->
+                    <div class="chart-container">
+                        <canvas id="demandChart" width="900" height="280"></canvas>
+                    </div>
+
+                    <div class="chart-legend">
+                        <div class="legend-item"><span class="legend-color legend-red"></span> Peak Hours (&ge; 6,000 riders/hr)</div>
+                        <div class="legend-item"><span class="legend-color legend-blue"></span> Regular / Off-Peak Hours</div>
+                        <div class="legend-item"><span class="legend-color legend-threshold"></span> Demand Threshold (6,000 riders)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2-col">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Peak vs Off-Peak Comparison</h3>
+                    </div>
+                    <div class="card-body">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Criteria</th>
+                                    <th>Peak Hours</th>
+                                    <th>Off-Peak Hours</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Time Windows</strong></td>
+                                    <td>08:00 AM - 10:30 AM<br>05:00 PM - 07:30 PM</td>
+                                    <td>11:00 AM - 04:30 PM<br>08:00 PM - 06:30 AM</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Passenger Load</strong></td>
+                                    <td>8,000 - 11,500 / hr</td>
+                                    <td>1,200 - 4,800 / hr</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Dynamic Multiplier</strong></td>
+                                    <td><span class="badge red">+30% Surge</span></td>
+                                    <td><span class="badge green">-10% Saver</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Policy Objective</strong></td>
+                                    <td>Flatten peak volume</td>
+                                    <td>Incentivize ridership</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Dynamic Fare Recommendation</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="recommendation-card">
+                            <h4>Rider Smart-Travel Advisory</h4>
+                            <p id="dynamic-recommendation-text" class="text-muted">
+                                Loading dynamic recommendation...
+                            </p>
+                            <hr>
+                            <div class="status-row">
+                                <span>Recommended Peak Surcharge:</span>
+                                <strong>+30% (+₹12.00 - ₹20.00)</strong>
+                            </div>
+                            <div class="status-row">
+                                <span>Recommended Off-Peak Saver:</span>
+                                <strong class="text-success">-10% (Save ₹5.00 - ₹9.00)</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 5: FARE HISTORY ================= -->
+        <section id="tab-history" class="tab-pane">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h3>Fare Calculation History</h3>
+                        <span class="text-muted small">Retrieved from MySQL table: <code>fare_history</code></span>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-sm btn-outline" onclick="loadFareHistory()">&#x21bb; Refresh</button>
+                        <button class="btn btn-sm btn-danger" onclick="confirmClearHistory()">Clear All Records</button>
+                    </div>
+                </div>
+                <div class="card-body table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Date &amp; Time</th>
+                                <th>Mode</th>
+                                <th>Source</th>
+                                <th>Destination</th>
+                                <th>Distance</th>
+                                <th>Passenger</th>
+                                <th>Travel Time</th>
+                                <th>Strategy</th>
+                                <th>Final Fare</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body">
+                            <tr><td colspan="11" class="text-center text-muted">Loading fare history...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 6: ABOUT PROJECT ================= -->
+        <section id="tab-about" class="tab-pane">
+            <div class="card mb-24">
+                <div class="card-header">
+                    <h3>About "Metro &amp; Bus Fare Calculator with Dynamic Pricing"</h3>
+                    <span class="badge blue">Architecture Overview</span>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        This web application is developed to calculate passenger transit fares across multimodal urban transit networks.
+                        It demonstrates clean architecture, design patterns, algorithmic shortest-path search, dynamic pricing logic, 
+                        and robust database persistence.
+                    </p>
+
+                    <div class="grid-3-col mt-20">
+                        <div class="tech-box">
+                            <h4>Backend (Java Spring Boot)</h4>
+                            <ul>
+                                <li>Layered Architecture: Controller, Service, Model, Repository</li>
+                                <li>Strategy Design Pattern for interchangeable pricing rules</li>
+                                <li>Graph representation and Dijkstra's Shortest Path Algorithm</li>
+                                <li>Spring Data JPA &amp; Hibernate ORM</li>
+                            </ul>
+                        </div>
+
+                        <div class="tech-box">
+                            <h4>Database (MySQL)</h4>
+                            <ul>
+                                <li>Database: <code>transit_fare_db</code></li>
+                                <li>Table: <code>fare_history</code> with indexing</li>
+                                <li>Stores complete audit history of all calculated fares</li>
+                                <li>Automatic DDL schema generation and query optimization</li>
+                            </ul>
+                        </div>
+
+                        <div class="tech-box">
+                            <h4>Frontend (HTML/CSS/JS)</h4>
+                            <ul>
+                                <li>Clean, responsive Blue &amp; White transit dashboard</li>
+                                <li>Vanilla JavaScript with asynchronous <code>fetch()</code> API calls</li>
+                                <li>Real-time HTML5 Canvas demand visualization</li>
+                                <li>Zero bulky framework dependencies; lightning-fast execution</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>Design Pattern &amp; Algorithmic Highlights</h3>
+                </div>
+                <div class="card-body">
+                    <div class="pattern-item">
+                        <h4>1. Strategy Design Pattern (GoF Behavioral Pattern)</h4>
+                        <p class="text-muted small">
+                            Defined an interface <code>FareCalculationStrategy</code> implemented by <code>DistanceBasedFareStrategy</code>,
+                            <code>ZoneBasedFareStrategy</code>, and <code>PeakOffPeakFareStrategy</code>. 
+                            The <code>FareStrategyFactory</code> dynamically selects the calculation algorithm at runtime based on the client request,
+                            ensuring the Open/Closed Principle (OCP) is strictly maintained.
+                        </p>
+                    </div>
+                    <hr>
+                    <div class="pattern-item">
+                        <h4>2. Dijkstra's Algorithm for Shortest Path</h4>
+                        <p class="text-muted small">
+                            Employs a weighted undirected graph representation of the transit network with a priority queue (min-heap) 
+                            to determine the lowest distance route between any two origin-destination station pairs.
+                        </p>
+                    </div>
+                    <hr>
+                    <div class="pattern-item">
+                        <h4>3. Dynamic Peak/Off-Peak Pricing</h4>
+                        <p class="text-muted small">
+                            Applies economics-based dynamic pricing to flatten peak ridership curve, calculating peak demand surcharges and 
+                            rewarding off-peak travel with saver discounts.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <p>&copy; Metro &amp; Bus Fare Calculator with Dynamic Pricing &bull; Built with Java Spring Boot, MySQL &amp; Vanilla Web</p>
+        </div>
+    </footer>
+
+    <!-- Frontend Script -->
+    <script src="js/app.js"></script>
+</body>
+</html>
